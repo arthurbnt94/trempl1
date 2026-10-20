@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trempl1</title>
+<meta name="description" content="Dépose ton CV, découvre les offres qui te correspondent et génère ta lettre de motivation ou ton message au recruteur en un clic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#F3F3F6;--surface:#FFFFFF;--surface2:#F0F0F4;--ink:#0E0E13;--muted:#5E5E6B;--line:#E3E3EA;--accent:#5B21F2;--accentSoft:#EEE8FF;--accentText:#4A16D6;--good:#11743F;--goodSoft:#E2F4E9;--warn:#8F5200;--warnSoft:#FCEFD9;--bad:#B4261F;--badSoft:#FBE7E5}
+:root[data-theme=dark]{--bg:#0D0D12;--surface:#17171F;--surface2:#20202A;--ink:#F3F3F7;--muted:#A3A3B2;--line:#2B2B37;--accent:#7448FF;--accentSoft:#251A48;--accentText:#C2AEFF;--good:#5FDB92;--goodSoft:#11301F;--warn:#F2B661;--warnSoft:#33260F;--bad:#FF8A80;--badSoft:#3A1614}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--accentText)} a:hover{color:var(--ink)}
+button,input,select,textarea{font-family:inherit}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+
+#root{min-height:100vh;display:flex;flex-direction:column}
+main{flex:1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px}
+.btn{border:none;cursor:pointer;font-weight:700}
+.btn-primary{background:var(--accent);color:#fff;border-radius:16px}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-soft{background:var(--accentSoft);color:var(--accentText);border-radius:14px}
+.btn-soft:hover{filter:brightness(.97)}
+.btn-ghost{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-dark{background:var(--ink);color:var(--bg);border-radius:12px}
+.link{background:none;border:none;color:var(--accentText);font-weight:600;font-size:15px;cursor:pointer;padding:4px}
+.back{align-self:flex-start;background:none;border:none;padding:6px 0;color:var(--muted);font-weight:600;font-size:15px;cursor:pointer}
+.menu-item{text-align:left;background:none;border:none;padding:10px 12px;border-radius:10px;font-weight:500;font-size:15px;color:var(--ink);cursor:pointer}
+.menu-item:hover,.nav-item:hover{background:var(--surface2)}
+.nav-item{background:none;border:none;padding:8px 12px;border-radius:10px;font-weight:600;font-size:15px;color:var(--ink);cursor:pointer}
+.field{display:flex;flex-direction:column;gap:6px}
+.label{font-weight:600;font-size:14px;color:var(--muted)}
+.input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-weight:600;font-size:16px}
+.h1{margin:0;font-size:clamp(30px,5vw,44px);letter-spacing:-.03em;font-weight:800;line-height:1.05}
+.muted{color:var(--muted)}
+.logo{display:grid;place-items:center;font-weight:900;flex:none}
+.pdf{border-radius:6px;background:var(--badSoft);color:var(--bad);display:grid;place-items:center;font:700 10px 'JetBrains Mono',monospace;flex:none}
+.tag{padding:4px 10px;border-radius:8px;background:var(--surface2)}
+.pill{padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px}
+.reason{display:flex;gap:8px}
+.reason b{font-weight:800}
+.spinner{width:18px;height:18px;border:2.5px solid var(--accentSoft);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:spin .8s linear infinite;flex:none}
+.overlay{position:fixed;inset:0;z-index:80;background:rgba(10,10,20,.5);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--surface);border-radius:26px;padding:26px;width:100%;display:flex;flex-direction:column;gap:14px}
+.seg{display:grid;gap:4px;background:var(--surface2);padding:4px;border-radius:12px}
+.seg button{border:none;border-radius:9px;color:var(--ink);font-weight:600;cursor:pointer}
+.offer{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:16px;transition:border-color .15s}
+.offer:hover{border-color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions .btn{height:44px;padding:0 16px;font-size:15px;border-radius:12px;flex:1 1 auto}
+.bar{height:6px;border-radius:6px;background:var(--surface2);overflow:hidden}
+.bar>div{height:100%;background:var(--accent);border-radius:6px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+// ---------- Réglages ----------
+const SITE_NAME = 'Trempl1';
+// Pour tester l'écran d'erreur de lecture du CV : ajouter ?cvError à l'URL
+const SIMULATE_CV_ERROR = new URLSearchParams(location.search).has('cvError');
+
+// ---------- Données de démonstration (offres fictives) ----------
+const LOGOS = [['#FFE8B3','#7A4B00'],['#DCEBFF','#0B4AA8'],['#E2F4E9','#1D6B3A'],['#FFE1E1','#A12626'],['#DDF5EF','#0F6B5A'],['#ECE6FF','#4A2BB0'],['#DFF1FF','#0A5C85'],['#FFE9D9','#9A4A10']];
+const OFFERS = [
+ {id:'batira',title:'Chef de projet travaux junior',company:'Batira Construction',city:'Nanterre (92)',km:14,contract:'CDI',salary:42,salaryLabel:'40–44 k€',posted:1,sector:'BTP',score:92,
+  summary:'Tu organises un chantier de bureaux à Nanterre : planning, budget et coordination des entreprises, épaulé par un chef de projet senior.',
+  reasons:['Tes compétences en gestion de projet','Ton alternance en coordination terrain','À 14 km de chez toi'],missing:['Le recruteur demande des notions d’AutoCAD'],
+  tip:'Une formation AutoCAD en ligne (10 h environ) suffit souvent à rassurer. Mentionne-la dans ton message si tu la commences.',
+  description:'Batira Construction réalise des bâtiments tertiaires en Île-de-France. Tu rejoins l’équipe du futur pôle de bureaux de Nanterre pour piloter le planning et la coordination des corps de métier aux côtés d’un chef de projet senior.',
+  missions:['Suivre le planning et le budget du chantier','Coordonner sous-traitants et bureaux d’études','Préparer les réunions de chantier et leurs comptes rendus'],wanted:['Bac+5 école d’ingénieur ou management de projet','Première expérience en alternance ou stage','Rigueur, aisance relationnelle, permis B'],
+  hook:'Le chantier du pôle tertiaire de Nanterre m’intéresse particulièrement : coordonner de nombreux intervenants, c’est exactement ce que j’ai pratiqué en alternance.'},
+ {id:'lumen',title:'Chargé·e de projet digital',company:'Lumen Banque',city:'Paris 9e',km:9,contract:'CDI',salary:42,salaryLabel:'42 k€',posted:0,sector:'Banque',score:87,
+  summary:'Tu fais évoluer l’appli mobile d’une banque : tu recueilles les besoins, tu animes les équipes tech et tu suis les résultats.',
+  reasons:['Ton Master en management de projet','Ta maîtrise de Power BI','Ton anglais C1'],missing:['Le recruteur demande Excel avancé (TCD, macros)'],
+  tip:'Tu utilises déjà Excel au quotidien : cite un exemple concret (suivi budgétaire, tableau de bord) et suis un module macros VBA pour combler l’écart.',
+  description:'Au sein de la direction digitale, tu pilotes des projets d’amélioration de l’appli mobile de la banque, de l’expression du besoin jusqu’à la mise en production.',
+  missions:['Recueillir les besoins des équipes métier','Animer les rituels avec les équipes produit et tech','Suivre les indicateurs de chaque lancement'],wanted:['Bac+5 en gestion de projet ou école de commerce','Excel avancé, idéalement Power BI','Anglais professionnel'],
+  hook:'Faire évoluer une appli utilisée par des millions de clients est un défi qui me motive, et mon expérience des tableaux de bord Power BI vous serait directement utile.'},
+ {id:'oree',title:'Consultant·e junior transformation',company:'Orée Conseil',city:'Paris 8e',km:11,contract:'CDI',salary:43,salaryLabel:'41–45 k€',posted:3,sector:'Conseil',score:84,
+  summary:'Tu aides des entreprises à changer leur façon de travailler : entretiens, ateliers et plans d’action, en binôme avec un manager.',
+  reasons:['Ta pratique de la méthode agile (Scrum)','Ton aisance à l’oral','Ton anglais C1'],missing:['Une première expérience en cabinet est appréciée'],
+  tip:'Mets en avant les moments où tu as accompagné un changement en alternance : c’est le cœur du métier de consultant.',
+  description:'Orée Conseil accompagne des ETI dans leur transformation organisationnelle. Tu interviens en mission chez les clients, en binôme avec un manager.',
+  missions:['Réaliser des diagnostics et entretiens','Construire des feuilles de route','Animer des ateliers avec les équipes client'],wanted:['Bac+5 école de commerce, d’ingénieur ou université','Esprit de synthèse','Anglais courant'],
+  hook:'Votre approche très terrain de la transformation me parle : en alternance, j’ai accompagné le passage d’une équipe de 15 personnes à un fonctionnement agile.'},
+ {id:'panier',title:'Product Owner junior',company:'Panier Frais',city:'Paris 11e',km:8,contract:'CDI',salary:45,salaryLabel:'45 k€',posted:2,sector:'E-commerce',score:79,
+  summary:'Tu améliores le site de commande d’une start-up de livraison de courses : tu choisis les priorités et tu travailles avec les développeurs.',
+  reasons:['Ta pratique de Scrum','Ton goût pour la data (SQL)'],missing:['Le recruteur demande une maîtrise avancée de Jira','Expérience produit B2C souhaitée'],
+  tip:'Jira s’apprend vite : la certification gratuite d’Atlassian se prépare en un week-end.',
+  description:'Panier Frais livre des courses locales en moins de 2 heures. Tu rejoins l’équipe produit pour faire évoluer le parcours de commande.',
+  missions:['Rédiger et prioriser le backlog','Analyser les données d’usage','Travailler avec les designers et développeurs'],wanted:['Bac+5','Première expérience produit ou projet digital','SQL apprécié'],
+  hook:'Client fidèle de Panier Frais, j’ai plein d’idées pour fluidifier le parcours de commande, et l’habitude de les prioriser avec des données.'},
+ {id:'verdance',title:'Chef·fe de projet RSE',company:'Verdance Énergie',city:'La Défense (92)',km:16,contract:'CDI',salary:43,salaryLabel:'43 k€',posted:5,sector:'Énergie',score:76,
+  summary:'Tu pilotes les actions environnementales et sociales d’un producteur d’énergie solaire et tu prépares son rapport annuel.',
+  reasons:['Ton mémoire sur le reporting extra-financier','Tes compétences en gestion de projet'],missing:['Connaissance de la CSRD demandée'],
+  tip:'Un MOOC sur la CSRD (directive européenne de reporting durable) te donnera le vocabulaire attendu en entretien.',
+  description:'Verdance Énergie développe des parcs solaires. Tu coordonnes le plan RSE du groupe et la préparation du reporting extra-financier.',
+  missions:['Piloter les chantiers du plan RSE','Collecter et fiabiliser les indicateurs','Sensibiliser les équipes'],wanted:['Bac+5','Intérêt fort pour la transition énergétique','Aisance avec les chiffres'],
+  hook:'Mon mémoire de Master portait sur le reporting extra-financier : piloter votre plan RSE serait la suite logique de ce travail.'},
+ {id:'mobilis',title:'Analyste data opérations',company:'Mobilis Transports',city:'Saint-Denis (93)',km:7,contract:'CDI',salary:39,salaryLabel:'38–40 k€',posted:6,sector:'Transport',score:72,
+  summary:'Tu analyses les données d’un réseau de bus pour réduire les retards, et tu présentes tes recommandations aux équipes terrain.',
+  reasons:['Ta maîtrise de Power BI et SQL','À 7 km de chez toi'],missing:['Python est demandé','Profil plus technique attendu'],
+  tip:'Si tu as déjà touché à Python, même un peu, dis-le. Sinon, montre comment tu as automatisé des tâches avec Excel ou Power Query.',
+  description:'Tu analyses les données d’exploitation du réseau de bus pour améliorer la ponctualité et l’affectation des véhicules.',
+  missions:['Construire des tableaux de bord','Analyser les retards et leurs causes','Présenter des recommandations aux équipes'],wanted:['Bac+5','SQL, Power BI, Python','Goût pour le terrain'],
+  hook:'Rendre un réseau de bus plus ponctuel grâce à la donnée, c’est concret et utile au quotidien : c’est ce qui m’attire chez vous.'},
+ {id:'ariane',title:'Chargé·e de mission qualité',company:'Groupe Santé Ariane',city:'Créteil (94)',km:13,contract:'CDD',salary:36,salaryLabel:'36 k€',posted:9,sector:'Santé',score:68,
+  summary:'CDD de 12 mois : tu prépares trois cliniques à leur certification qualité et tu formes les équipes aux bonnes pratiques.',
+  reasons:['Ta rigueur dans le suivi de projets','Ton expérience des audits internes'],missing:['Le secteur santé est un plus','CDD de 12 mois'],
+  tip:'Ce CDD de 12 mois peut être un bon tremplin : demande s’il existe une perspective de CDI.',
+  description:'Tu accompagnes la démarche qualité de trois cliniques du groupe en vue de leur certification.',
+  missions:['Préparer la certification HAS','Suivre les plans d’action','Former les équipes aux procédures'],wanted:['Bac+5 qualité, santé ou management','Rigueur','Sens du contact'],
+  hook:'Contribuer à la qualité des soins donne beaucoup de sens à mon métier de chef de projet.'},
+ {id:'halle',title:'Chef·fe de projet événementiel',company:'Studio Halle',city:'Paris 19e',km:5,contract:'CDI',salary:null,salaryLabel:'Salaire non communiqué',posted:14,sector:'Événementiel',score:64,
+  summary:'Tu organises des salons et des soirées d’entreprise de A à Z : budget, prestataires et coordination le jour J.',
+  reasons:['Ton sens de l’organisation','À 5 km de chez toi'],missing:['Expérience en événementiel demandée','Disponibilité en soirée'],
+  tip:'Parle des événements que tu as organisés en association étudiante : ça compte comme de l’expérience.',
+  description:'Studio Halle organise des salons et soirées d’entreprise dans un lieu de 2 000 m² à Paris.',
+  missions:['Gérer les projets de A à Z','Négocier avec les prestataires','Coordonner les équipes le jour J'],wanted:['Bac+5','Première expérience événementielle','Disponibilité ponctuelle en soirée'],
+  hook:'J’ai organisé le gala de mon école pour 600 personnes : orchestrer un événement de A à Z est ce que je préfère.'}
+].map((o,i)=>({...o,letter:o.company[0],logoBg:LOGOS[i][0],logoFg:LOGOS[i][1]}));
+const BY = Object.fromEntries(OFFERS.map(o=>[o.id,o]));
+const SECTORS = ['BTP','Banque','Conseil','E-commerce','Énergie','Transport','Santé','Événementiel'];
+const CONTRACTS = ['CDI','CDD','Alternance','Stage'];
+const STEPS = [['Compétences','7 repérées'],['Expérience','2 ans d’alternance'],['Formation','Master · Bac+5'],['Localisation','Montreuil (93)']];
+const KINDS = {
+  letter:{label:'Lettre de motivation',short:'la lettre',gen:'Générer la lettre de motivation',loading:'Trempl1 rédige ta lettre de motivation…'},
+  message:{label:'Message au recruteur',short:'le message',gen:'Générer un court message au recruteur',loading:'Trempl1 rédige ton message au recruteur…'}};
+const TONES = [['formel','Plus formel'],['court','Plus court'],['motive','Plus motivé']];
+const FAQ = [
+  ['C’est vraiment gratuit ?','Oui. Le service est gratuit pour les candidats.'],
+  ['Vous postulez à ma place ?','Non. Trempl1 trouve les offres et rédige tes textes. Tu les relis, tu les modifies si tu veux, et tu postules toi-même sur l’annonce. Rien n’est envoyé en ton nom.'],
+  ['Les lettres sont vraiment personnalisées ?','Oui : chaque texte est rédigé à partir de ton CV et de la fiche de poste. Relis-le quand même et ajoute ta touche, c’est toi que le recruteur veut rencontrer.'],
+  ['Que faites-vous de mon CV ?','On l’utilise uniquement pour te proposer des offres et rédiger tes textes. Il n’est jamais vendu ni partagé.'],
+  ['Je peux supprimer mes données ?','Oui, à tout moment depuis tes paramètres : ton CV, ton profil et ton compte, en un clic.']];
+const DEF_FILTERS = {contrats:['CDI'],distance:30,salaireMin:0,secteurs:[],date:'all'};
+const DEF_PROFILE = {poste:'Chef de projet junior',skills:['Gestion de projet','Excel','Power BI','SQL','Méthode agile (Scrum)','Anglais C1','Communication'],niveau:'Bac+5',ville:'Montreuil (93)',mobilite:30,contrats:['CDI'],salaire:'40 000 €'};
+
+// ---------- Utilitaires ----------
+const today = () => new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+const longDate = () => new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const posted = d => d===0?'Aujourd’hui':d===1?'Hier':'Il y a '+d+' j';
+const toggleIn = (arr,v) => arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];
+const lowerFirst = t => t[0].toLowerCase()+t.slice(1);
+
+// ---------- Génération des textes (simulée : sera remplacée par l'IA) ----------
+function makeMessage(o,tone){
+  const sign='Léa Martin\n06 12 34 56 78';
+  if(tone==='formel') return `Madame, Monsieur,\n\nTitulaire d'un Master en management de projet (Bac+5), je me permets de vous adresser ma candidature au poste de ${o.title} au sein de ${o.company}.\n\n${o.hook}\n\nAu cours de deux années d'alternance chez Logista Services, j'ai piloté des plannings multi-équipes, assuré le suivi budgétaire et produit des tableaux de bord sous Excel et Power BI.\n\nJe me tiens à votre disposition pour un entretien. Bien respectueusement,\n\n${sign}`;
+  if(tone==='court') return `Bonjour,\n\nDiplômée d'un Master en management de projet, je candidate au poste de ${o.title}. Deux ans d'alternance en coordination de projets, à l'aise avec Excel, Power BI et les méthodes agiles.\n\nMon CV est joint. Disponible pour échanger quand vous voulez.\n\n${sign}`;
+  if(tone==='motive') return `Bonjour,\n\nEn lisant votre offre de ${o.title}, j'ai tout de suite eu envie de vous écrire. ${o.hook}\n\nPendant mes deux ans d'alternance chez Logista Services, j'ai adoré faire avancer des projets concrets avec des équipes variées. Je suis prête à m'investir à fond chez ${o.company}.\n\nJe serais vraiment ravie d'en parler avec vous. Mon CV est joint.\n\nÀ très vite,\n${sign}`;
+  return `Bonjour,\n\nJeune diplômée d'un Master en management de projet (Bac+5), je vous propose ma candidature pour le poste de ${o.title} chez ${o.company}.\n\n${o.hook}\n\nMon alternance de deux ans chez Logista Services m'a appris à piloter des plannings, coordonner des équipes et suivre des budgets avec Excel et Power BI.\n\nJe serais ravie d'échanger avec vous. Mon CV est joint à ce message.\n\nBien cordialement,\n${sign}`;
+}
+function makeLetter(o,tone){
+  const head = `Léa Martin\nMontreuil (93)\nlea.martin@mail.fr · 06 12 34 56 78\n\n${o.company}\nService recrutement\n\nMontreuil, le ${longDate()}\n\nObjet : candidature au poste de ${o.title}\n\n`;
+  const mission = lowerFirst(o.missions[0]);
+  if(tone==='court') return head + `Madame, Monsieur,\n\nJeune diplômée d'un Master en management de projet (Bac+5), je vous adresse ma candidature au poste de ${o.title}. ${o.hook}\n\nDeux ans d'alternance chez Logista Services m'ont appris à piloter des plannings, suivre des budgets et coordonner des équipes : des compétences directement utiles pour ${mission}.\n\nJe serais heureuse d'en discuter lors d'un entretien. Veuillez agréer, Madame, Monsieur, mes salutations distinguées.\n\nLéa Martin`;
+  if(tone==='motive') return head + `Madame, Monsieur,\n\nQuand j'ai découvert votre offre de ${o.title}, j'ai su que je devais vous écrire. ${o.hook}\n\nPendant deux ans d'alternance chez Logista Services, j'ai pris goût aux projets concrets : piloter des plannings serrés, réunir des équipes aux attentes différentes, construire des tableaux de bord sous Power BI pour que chacun sache où on en est. C'est cette énergie que je veux mettre au service de ${o.company}, notamment pour ${mission}.\n\nJe suis curieuse, j'apprends vite et je ne lâche rien tant qu'un projet n'est pas bouclé. J'aimerais beaucoup vous le prouver lors d'un entretien.\n\nDans l'attente de votre retour, je vous prie d'agréer, Madame, Monsieur, mes salutations les meilleures.\n\nLéa Martin`;
+  if(tone==='formel') return head + `Madame, Monsieur,\n\nTitulaire d'un Master en management de projet (Bac+5), j'ai l'honneur de vous soumettre ma candidature au poste de ${o.title} proposé par ${o.company}.\n\n${o.hook}\n\nAu cours de deux années d'alternance au sein de Logista Services, j'ai assuré le pilotage de plannings multi-équipes, le suivi budgétaire de plusieurs projets ainsi que la production de tableaux de bord sous Excel et Power BI. Ces responsabilités m'ont permis de développer la rigueur et le sens de l'organisation nécessaires pour ${mission}.\n\nVivement intéressée par les projets de ${o.company}, je souhaiterais vous exposer plus en détail mes motivations lors d'un entretien.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\nLéa Martin`;
+  return head + `Madame, Monsieur,\n\nJeune diplômée d'un Master en management de projet (Bac+5), je souhaite rejoindre ${o.company} en tant que ${o.title}. ${o.hook}\n\nPendant deux ans d'alternance chez Logista Services, j'ai piloté des plannings multi-équipes, suivi des budgets et construit des tableaux de bord sous Excel et Power BI. Ces missions m'ont appris à coordonner des interlocuteurs variés et à tenir les délais, des qualités essentielles pour ${mission}.\n\nRigoureuse et à l'aise à l'oral, je suis convaincue de pouvoir apporter rapidement à votre équipe. Je serais ravie de vous présenter mes motivations lors d'un entretien.\n\nJe vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.\n\nLéa Martin`;
+}
+const generate = (kind,o,tone) => kind==='letter' ? makeLetter(o,tone) : makeMessage(o,tone);
+
+// ---------- Petits composants ----------
+const Check = ({size=12,w=4,style}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" style={style}><path d="M5 12l5 5 9-10"/></svg>;
+const Logo = ({o,size=48,r=14,fs=20}) => <span className="logo" style={{width:size,height:size,borderRadius:r,background:o.logoBg,color:o.logoFg,fontSize:fs}}>{o.letter}</span>;
+const Pdf = ({w=34,h=42,fs=10}) => <span className="pdf" style={{width:w,height:h,fontSize:fs}}>PDF</span>;
+const Reasons = ({list,icon='✓',color='var(--good)'}) => list.map((r,i)=><span key={i} className="reason"><b style={{color}}>{icon}</b>{r}</span>);
+const chipStyle = v => ({background:v?'var(--ink)':'var(--surface)',color:v?'var(--bg)':'var(--ink)',border:'1.5px solid '+(v?'var(--ink)':'var(--line)')});
+const segStyle = v => ({background:v?'var(--surface)':'transparent',boxShadow:v?'0 1px 3px rgba(0,0,0,.12)':'none'});
+
+class App extends React.Component {
+  fileRef = React.createRef(); addCvRef = React.createRef();
+  timers = [];
+  state = {
+    screen:'home', dark:false, width:window.innerWidth,
+    consent:false, consentError:false, dragging:false, fileName:'CV_Lea_Martin_2026.pdf', step:0,
+    profile:DEF_PROFILE, newSkill:'', filters:DEF_FILTERS, drawerOpen:false,
+    current:'batira', kind:'letter', texts:{}, tones:{}, genLoading:false,
+    loggedIn:false, authMode:'signup', authEmail:'', authPw:'', authError:'',
+    menuOpen:false, faqOpen:0, toast:'', scoreReady:false,
+    cvs:[{id:1,name:'CV_Lea_Martin_2026.pdf',date:'18 oct.',main:true}],
+    alerts:true, freq:'jour', deleteOpen:null
+  };
+  componentDidMount(){ this.onResize=()=>this.setState({width:window.innerWidth}); window.addEventListener('resize',this.onResize); }
+  componentWillUnmount(){ window.removeEventListener('resize',this.onResize); this.timers.forEach(clearTimeout); }
+  componentDidUpdate(){ document.documentElement.dataset.theme = this.state.dark?'dark':'light'; }
+  later(fn,ms){ this.timers.push(setTimeout(fn,ms)); }
+  showToast(t){ this.setState({toast:t}); clearTimeout(this.tt); this.tt=setTimeout(()=>this.setState({toast:''}),3200); }
+  go(screen,extra={}){
+    this.setState({screen,menuOpen:false,drawerOpen:false,...extra},()=>{
+      window.scrollTo(0,0);
+      if(screen==='results'){ this.setState({scoreReady:false}); this.later(()=>this.setState({scoreReady:true}),80); }
+    });
+  }
+  key(id=this.state.current,kind=this.state.kind){ return id+':'+kind; }
+  textFor(id,kind){ const k=this.key(id,kind); return this.state.texts[k] ?? generate(kind,BY[id],this.state.tones[k]||'base'); }
+  openGenerator(id,kind){ this.go('generate',{current:id,kind,genLoading:true}); this.later(()=>this.setState({genLoading:false}),1100); }
+  copy(text){
+    const done=()=>this.showToast('Copié ! Colle-le dans ta candidature.');
+    if(navigator.clipboard) navigator.clipboard.writeText(text).then(done,()=>this.showToast('Copie impossible : sélectionne le texte à la main.'));
+    else this.showToast('Copie impossible : sélectionne le texte à la main.');
+  }
+  download(text,o){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
+    a.download=`Lettre_motivation_${o.company.replace(/\s+/g,'_')}.txt`; a.click(); URL.revokeObjectURL(a.href);
+  }
+  applyLink(){ this.showToast('Démo : le lien vers l’annonce d’origine arrivera avec les vraies offres.'); }
+  startUpload(file){
+    if(!this.state.consent){ this.setState({consentError:true}); return; }
+    const name = file ? file.name : 'CV_Lea_Martin_2026.pdf';
+    const bad = (file && !/\.(pdf|docx?)$/i.test(name)) || SIMULATE_CV_ERROR;
+    this.timers.forEach(clearTimeout); this.timers=[];
+    this.go('analyze',{fileName:name,step:0});
+    const stopAt = bad?2:4;
+    for(let i=1;i<=stopAt;i++) this.later(()=>this.setState({step:i}),i*750);
+    this.later(()=>this.go(bad?'cvError':'profile'), stopAt*750+600);
+  }
+  filtered(){
+    const f=this.state.filters;
+    return OFFERS.filter(o=>f.contrats.includes(o.contract)&&o.km<=f.distance&&(o.salary==null||o.salary>=f.salaireMin)&&(f.secteurs.length===0||f.secteurs.includes(o.sector))&&(f.date==='all'||o.posted<=Number(f.date)));
+  }
+  setF(patch){ this.setState(s=>({filters:{...s.filters,...patch}})); }
+  setP(patch){ this.setState(s=>({profile:{...s.profile,...patch}})); }
+
+  // Les 3 boutons présents sur chaque offre
+  offerActions(o,withMore){
+    return <div className="actions">
+      {withMore && <button className="btn btn-ghost" onClick={()=>this.go('detail',{current:o.id})}>En savoir plus</button>}
+      <button className="btn btn-primary" onClick={()=>this.openGenerator(o.id,'letter')}>Générer une lettre de motivation</button>
+      <button className="btn btn-soft" onClick={()=>this.openGenerator(o.id,'message')}>Générer un message au recruteur</button>
+    </div>;
+  }
+
+  // ---------- En-tête ----------
+  header(isMobile){
+    const s=this.state;
+    return <header style={{position:'sticky',top:0,zIndex:30,background:'var(--bg)',borderBottom:'1px solid var(--line)'}}>
+      <div style={{maxWidth:1200,margin:'0 auto',padding:'12px 20px',display:'flex',alignItems:'center',gap:20}}>
+        <button onClick={()=>this.go('home')} style={{display:'flex',alignItems:'center',gap:10,background:'none',border:'none',cursor:'pointer',padding:0,color:'var(--ink)'}}>
+          <span style={{width:34,height:34,borderRadius:11,background:'var(--accent)',display:'grid',placeItems:'center',color:'#fff',fontWeight:900,fontSize:18}}>T</span>
+          <span style={{fontWeight:800,fontSize:20,letterSpacing:'-.02em'}}>Trempl<span style={{color:'var(--accent)'}}>1</span></span>
+        </button>
+        {!isMobile && s.loggedIn && <nav style={{display:'flex',gap:4}}>
+          <button className="nav-item" onClick={()=>this.go('results')}>Mes offres</button>
+        </nav>}
+        <div style={{flex:1}}/>
+        <button onClick={()=>this.setState({dark:!s.dark})} aria-label="Mode sombre" style={{width:40,height:40,borderRadius:12,border:'1px solid var(--line)',background:'var(--surface)',color:'var(--ink)',cursor:'pointer',display:'grid',placeItems:'center'}}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        </button>
+        {s.loggedIn
+          ? <button onClick={()=>this.setState({menuOpen:!s.menuOpen})} style={{width:40,height:40,borderRadius:'50%',border:'none',background:'var(--ink)',color:'var(--bg)',fontWeight:700,fontSize:15,cursor:'pointer'}}>LM</button>
+          : <button className="btn btn-dark" onClick={()=>this.go('auth',{authMode:'login'})} style={{height:40,padding:'0 16px',fontWeight:600,fontSize:15}}>Se connecter</button>}
+      </div>
+      {s.menuOpen && <div className="card" style={{position:'absolute',right:20,top:62,borderRadius:16,padding:8,minWidth:220,boxShadow:'0 20px 40px rgba(0,0,0,.12)',display:'flex',flexDirection:'column'}}>
+        <div style={{padding:'8px 12px 10px',borderBottom:'1px solid var(--line)',marginBottom:6}}><div style={{fontWeight:700}}>Léa Martin</div><div style={{fontSize:13}} className="muted">lea.martin@mail.fr</div></div>
+        <button className="menu-item" onClick={()=>this.go('results')}>Mes offres</button>
+        <button className="menu-item" onClick={()=>this.go('settings')}>Paramètres</button>
+        <button className="menu-item" style={{color:'var(--muted)'}} onClick={()=>{this.go('home',{loggedIn:false}); this.showToast('Tu es déconnecté·e.');}}>Se déconnecter</button>
+      </div>}
+    </header>;
+  }
+
+  // ---------- 1. Accueil ----------
+  home(){
+    const s=this.state;
+    const needConsent = fn => () => s.consent ? fn() : this.setState({consentError:true});
+    const howCard = (n,title,text,visual) => <div className="card" style={{padding:24,display:'flex',flexDirection:'column',gap:18}}>
+      <div style={{background:'var(--surface2)',borderRadius:16,height:150,display:'grid',placeItems:'center'}}>{visual}</div>
+      <div style={{display:'flex',gap:12,alignItems:'baseline'}}><span style={{fontWeight:900,color:'var(--accent)',fontSize:22}}>{n}</span><div><div style={{fontWeight:700,fontSize:20}}>{title}</div><div className="muted">{text}</div></div></div>
+    </div>;
+    const mini = {background:'var(--surface)',border:'1px solid var(--line)',borderRadius:14,padding:'12px 16px',boxShadow:'0 10px 24px rgba(0,0,0,.06)'};
+    return <>
+      <section style={{maxWidth:1200,margin:'0 auto',padding:'clamp(28px,6vw,72px) 20px 40px',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,420px),1fr))',gap:40,alignItems:'center'}}>
+        <div style={{display:'flex',flexDirection:'column',gap:22}}>
+          <span style={{alignSelf:'flex-start',display:'flex',alignItems:'center',gap:8,padding:'6px 12px',borderRadius:999,background:'var(--surface)',border:'1px solid var(--line)',fontSize:13,fontWeight:600}}><span style={{width:8,height:8,borderRadius:'50%',background:'var(--good)'}}/>Gratuit · pour les jeunes qui cherchent un job</span>
+          <h1 style={{margin:0,fontSize:'clamp(38px,6.2vw,76px)',lineHeight:.98,letterSpacing:'-.04em',fontWeight:900,textWrap:'balance'}}>Dépose ton CV. On trouve tes offres <span style={{color:'var(--accent)'}}>et on écrit ta candidature.</span></h1>
+          <p className="muted" style={{margin:0,fontSize:19,maxWidth:520,textWrap:'pretty'}}>Chaque offre résumée en deux lignes. Ta lettre de motivation ou ton message au recruteur, rédigés en un clic à partir de ton CV.</p>
+        </div>
+        <div className="card" style={{borderRadius:28,padding:'clamp(18px,3vw,28px)',display:'flex',flexDirection:'column',gap:16,boxShadow:'0 30px 60px -30px rgba(40,20,120,.25)'}}>
+          <div onDragOver={e=>{e.preventDefault(); if(!s.dragging) this.setState({dragging:true});}} onDragLeave={()=>this.setState({dragging:false})}
+               onDrop={e=>{e.preventDefault(); this.setState({dragging:false}); this.startUpload(e.dataTransfer.files[0]);}}
+               style={{border:'2px dashed '+(s.dragging?'var(--accent)':'var(--line)'),background:s.dragging?'var(--accentSoft)':'var(--surface2)',borderRadius:20,padding:'32px 20px',display:'flex',flexDirection:'column',alignItems:'center',gap:14,textAlign:'center',transition:'all .2s'}}>
+            <span style={{width:56,height:56,borderRadius:18,background:'var(--accent)',display:'grid',placeItems:'center',color:'#fff'}}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+            </span>
+            <div style={{fontWeight:700,fontSize:18}}>Glisse ton CV ici</div>
+            <button className="btn btn-primary" onClick={needConsent(()=>this.fileRef.current.click())} style={{width:'100%',maxWidth:320,height:58,fontSize:18}}>Déposer mon CV</button>
+            <div className="muted" style={{fontSize:13}}>PDF ou Word · 5 Mo max</div>
+            <input ref={this.fileRef} type="file" accept=".pdf,.doc,.docx" style={{display:'none'}} onChange={e=>{const f=e.target.files[0]; e.target.value=''; if(f) this.startUpload(f);}}/>
+          </div>
+          <label style={{display:'flex',gap:12,alignItems:'flex-start',cursor:'pointer',fontSize:14,padding:12,borderRadius:14,background:s.consentError?'var(--badSoft)':'var(--surface2)'}}>
+            <input type="checkbox" checked={s.consent} onChange={()=>this.setState({consent:!s.consent,consentError:false})} style={{width:20,height:20,margin:'1px 0 0',accentColor:'var(--accent)',flex:'none'}}/>
+            <span>J'accepte que {SITE_NAME} analyse mon CV pour me proposer des offres et rédiger mes textes. Mes données ne sont jamais partagées. <a href="#" onClick={e=>e.preventDefault()}>Politique de confidentialité</a></span>
+          </label>
+          {s.consentError && <div style={{fontSize:14,color:'var(--bad)',fontWeight:600,marginTop:-6}}>Coche la case ci-dessus pour qu'on puisse lire ton CV.</div>}
+          <button className="link" onClick={needConsent(()=>this.startUpload(null))}>Pas de CV sous la main ? Essayer avec un exemple →</button>
+        </div>
+      </section>
+
+      <section style={{maxWidth:1200,margin:'0 auto',padding:'48px 20px'}}>
+        <h2 style={{margin:'0 0 28px',fontSize:'clamp(30px,4vw,48px)',letterSpacing:'-.03em',fontWeight:800,lineHeight:1.05}}>Comment ça marche</h2>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,280px),1fr))',gap:16}}>
+          {howCard(1,'Dépose ton CV','On lit tes compétences, ton expérience et ta ville en quelques secondes.',
+            <div style={{...mini,display:'flex',alignItems:'center',gap:12}}><Pdf/><span style={{fontWeight:600,fontSize:14}}>Mon_CV.pdf</span><span style={{width:22,height:22,borderRadius:'50%',background:'var(--good)',color:'#fff',display:'grid',placeItems:'center'}}><Check/></span></div>)}
+          {howCard(2,'Découvre tes offres','Les postes qui te correspondent, résumés simplement, avec un score de compatibilité.',
+            <div style={{...mini,display:'flex',flexDirection:'column',gap:8,width:230}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span style={{fontWeight:700,fontSize:14}}>Chef de projet</span><span style={{fontWeight:900,color:'var(--accent)'}}>87 %</span></div>
+              <div className="bar"><div style={{width:'87%'}}/></div>
+              <div className="muted" style={{fontSize:12,lineHeight:1.35}}>Tu pilotes un chantier de bureaux, épaulé par un senior.</div>
+            </div>)}
+          {howCard(3,'Génère ta candidature','Lettre de motivation ou message au recruteur : prêts à copier, tu n’as plus qu’à postuler.',
+            <div style={{display:'flex',flexDirection:'column',gap:8,alignItems:'center'}}>
+              <span style={{background:'var(--accent)',color:'#fff',borderRadius:12,padding:'9px 16px',fontWeight:700,fontSize:13}}>Générer une lettre de motivation</span>
+              <span style={{background:'var(--accentSoft)',color:'var(--accentText)',borderRadius:12,padding:'9px 16px',fontWeight:700,fontSize:13}}>Générer un message au recruteur</span>
+            </div>)}
+        </div>
+      </section>
+
+      <section style={{maxWidth:1200,margin:'0 auto',padding:'48px 20px',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,340px),1fr))',gap:16}}>
+        <div className="card" style={{padding:28,display:'flex',flexDirection:'column',gap:16}}>
+          <div style={{fontSize:26,fontWeight:800,letterSpacing:'-.02em',lineHeight:1.1}}>Postule en 2 minutes au lieu d’une soirée.</div>
+          <div className="muted" style={{display:'flex',flexDirection:'column',gap:10}}>
+            <div>✓ Plus besoin de lire 30 annonces : le résumé te dit l’essentiel</div>
+            <div>✓ Plus de page blanche : ta lettre part de ton CV et de l’offre</div>
+            <div>✓ Tu relis, tu ajustes, tu postules. Tu gardes la main</div>
+          </div>
+        </div>
+        <div style={{background:'var(--accent)',color:'#fff',borderRadius:24,padding:28,display:'flex',flexDirection:'column',gap:16}}>
+          <div style={{fontSize:26,fontWeight:800,letterSpacing:'-.02em',lineHeight:1.1}}>Tes données restent privées.</div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <div>✓ Ton CV n'est jamais partagé ni vendu</div>
+            <div>✓ Rien n'est envoyé en ton nom</div>
+            <div>✓ Tu supprimes tout en un clic, quand tu veux</div>
+          </div>
+        </div>
+      </section>
+
+      <section style={{maxWidth:820,margin:'0 auto',padding:'48px 20px 72px'}}>
+        <h2 style={{margin:'0 0 20px',fontSize:'clamp(28px,4vw,40px)',letterSpacing:'-.03em',fontWeight:800}}>Questions fréquentes</h2>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {FAQ.map(([q,a],i)=>{const open=s.faqOpen===i; return <div key={i} className="card" style={{borderRadius:18}}>
+            <button onClick={()=>this.setState({faqOpen:open?-1:i})} style={{width:'100%',display:'flex',justifyContent:'space-between',gap:16,alignItems:'center',background:'none',border:'none',padding:'18px 20px',fontWeight:700,fontSize:17,color:'var(--ink)',cursor:'pointer',textAlign:'left'}}>{q}<span style={{fontSize:22,color:'var(--accent)',flex:'none'}}>{open?'−':'+'}</span></button>
+            {open && <div className="muted" style={{padding:'0 20px 18px'}}>{a}</div>}
+          </div>;})}
+        </div>
+      </section>
+    </>;
+  }
+
+  // ---------- 2a. Analyse ----------
+  analyze(){
+    const s=this.state;
+    return <section style={{maxWidth:520,margin:'0 auto',padding:'clamp(40px,10vh,100px) 20px'}}>
+      <div className="card" style={{borderRadius:28,padding:32,display:'flex',flexDirection:'column',gap:24}}>
+        <div className="muted" style={{display:'flex',alignItems:'center',gap:12,fontSize:14}}><Pdf w={30} h={38} fs={9}/>{s.fileName}</div>
+        <h1 style={{margin:0,fontSize:32,letterSpacing:'-.03em',fontWeight:800}}>On analyse ton CV…</h1>
+        <div className="bar" style={{height:8}}><div style={{width:(s.step/4*100)+'%',transition:'width .6s ease'}}/></div>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          {STEPS.map(([label,detail],i)=>{const done=s.step>i,active=s.step===i; return <div key={label} style={{display:'flex',alignItems:'center',gap:14}}>
+            <span style={{width:28,height:28,borderRadius:'50%',flex:'none',display:'grid',placeItems:'center',background:done?'var(--accent)':'transparent',border:'2px solid '+(done?'var(--accent)':active?'transparent':'var(--line)'),color:'#fff'}}>
+              {done && <Check size={14} style={{animation:'pop .3s ease'}}/>}{active && <span className="spinner"/>}
+            </span>
+            <div style={{flex:1,fontWeight:600,fontSize:17,color:done||active?'var(--ink)':'var(--muted)'}}>{label}</div>
+            <div className="muted" style={{fontSize:14}}>{done?detail:''}</div>
+          </div>;})}
+        </div>
+      </div>
+    </section>;
+  }
+
+  // ---------- 2b. Erreur CV ----------
+  cvError(){
+    return <section style={{maxWidth:560,margin:'0 auto',padding:'clamp(40px,10vh,100px) 20px'}}>
+      <div className="card" style={{borderRadius:28,padding:32,display:'flex',flexDirection:'column',gap:18}}>
+        <span style={{width:52,height:52,borderRadius:16,background:'var(--badSoft)',color:'var(--bad)',display:'grid',placeItems:'center',fontWeight:900,fontSize:26}}>!</span>
+        <h1 style={{margin:0,fontSize:30,letterSpacing:'-.03em',fontWeight:800,lineHeight:1.1}}>On n'arrive pas à lire ton CV</h1>
+        <p className="muted" style={{margin:0}}>Le fichier <b style={{color:'var(--ink)'}}>{this.state.fileName}</b> est peut-être une image scannée, protégé par mot de passe ou dans un format non pris en charge.</p>
+        <div style={{background:'var(--surface2)',borderRadius:16,padding:'16px 18px',display:'flex',flexDirection:'column',gap:8,fontSize:15}}>
+          <b>Ce qui marche le mieux</b>
+          <span>· Un PDF exporté depuis Word, Google Docs ou Canva</span>
+          <span>· Un fichier .docx de moins de 5 Mo</span>
+          <span>· Du texte sélectionnable (pas une photo du CV)</span>
+        </div>
+        <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
+          <button className="btn btn-primary" onClick={()=>this.go('home',{consent:true})} style={{flex:'1 1 200px',height:52,borderRadius:14,fontSize:16}}>Essayer un autre fichier</button>
+          <button className="btn btn-ghost" onClick={()=>this.go('profile')} style={{flex:'1 1 200px',height:52,fontSize:16}}>Remplir mon profil à la main</button>
+        </div>
+      </div>
+    </section>;
+  }
+
+  // ---------- 2c. Profil ----------
+  profile(){
+    const s=this.state, p=s.profile;
+    return <section style={{maxWidth:760,margin:'0 auto',padding:'40px 20px 120px',display:'flex',flexDirection:'column',gap:24}}>
+      <div style={{display:'flex',flexDirection:'column',gap:8}}>
+        <span className="pill" style={{alignSelf:'flex-start',background:'var(--goodSoft)',color:'var(--good)',padding:'4px 12px'}}>✓ CV analysé</span>
+        <h1 className="h1">Voilà ce qu'on a compris de ton profil</h1>
+        <p className="muted" style={{margin:0,fontSize:17}}>Vérifie et corrige si besoin. Plus c'est précis, meilleures sont les offres et tes lettres.</p>
+      </div>
+      <div className="card" style={{padding:'clamp(18px,3vw,28px)',display:'flex',flexDirection:'column',gap:22}}>
+        <label className="field"><span className="label">Poste recherché</span>
+          <input className="input" style={{fontSize:17}} value={p.poste} onChange={e=>this.setP({poste:e.target.value})}/></label>
+        <div className="field" style={{gap:8}}><span className="label">Compétences</span>
+          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+            {p.skills.map(t=><span key={t} style={{display:'flex',alignItems:'center',gap:6,padding:'7px 8px 7px 14px',borderRadius:999,background:'var(--accentSoft)',color:'var(--accentText)',fontWeight:600,fontSize:15}}>{t}
+              <button onClick={()=>this.setP({skills:p.skills.filter(x=>x!==t)})} aria-label="Retirer" style={{width:22,height:22,borderRadius:'50%',border:'none',background:'transparent',color:'inherit',cursor:'pointer',fontSize:16,lineHeight:1}}>×</button></span>)}
+            <input value={s.newSkill} onChange={e=>this.setState({newSkill:e.target.value})} placeholder="+ Ajouter (Entrée)"
+              onKeyDown={e=>{ if(e.key==='Enter'&&s.newSkill.trim()){ this.setP({skills:[...p.skills,s.newSkill.trim()]}); this.setState({newSkill:''}); } }}
+              style={{minWidth:150,flex:1,padding:'7px 14px',border:'1px dashed var(--line)',borderRadius:999,background:'transparent',color:'var(--ink)',fontWeight:500,fontSize:15}}/>
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,200px),1fr))',gap:16}}>
+          <label className="field"><span className="label">Niveau d'études</span>
+            <select className="input" value={p.niveau} onChange={e=>this.setP({niveau:e.target.value})}>
+              {['Bac','Bac+2','Bac+3','Bac+5','Bac+8'].map(n=><option key={n}>{n}</option>)}
+            </select></label>
+          <label className="field"><span className="label">Ville</span><input className="input" value={p.ville} onChange={e=>this.setP({ville:e.target.value})}/></label>
+          <label className="field"><span className="label">Salaire souhaité (brut annuel)</span><input className="input" value={p.salaire} onChange={e=>this.setP({salaire:e.target.value})}/></label>
+        </div>
+        <label className="field" style={{gap:8}}><span className="label" style={{display:'flex',justifyContent:'space-between'}}>Mobilité<b style={{color:'var(--ink)'}}>{p.mobilite} km autour de {p.ville}</b></span>
+          <input type="range" min="5" max="60" step="5" value={p.mobilite} onChange={e=>this.setP({mobilite:Number(e.target.value)})} style={{width:'100%',accentColor:'var(--accent)'}}/></label>
+        <div className="field" style={{gap:8}}><span className="label">Type de contrat</span>{this.contractChips(44)}</div>
+      </div>
+      <div style={{position:'sticky',bottom:16,display:'flex',justifyContent:'flex-end'}}>
+        <button className="btn btn-primary" onClick={()=>this.go('results',{filters:{...DEF_FILTERS,contrats:p.contrats.length?p.contrats:['CDI'],distance:Math.min(50,p.mobilite)}})}
+          style={{width:'100%',maxWidth:340,height:58,fontSize:18,boxShadow:'0 16px 30px -12px rgba(91,33,242,.6)'}}>Voir mes offres →</button>
+      </div>
+    </section>;
+  }
+  contractChips(h){
+    const p=this.state.profile;
+    return <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+      {CONTRACTS.map(c=><button key={c} className="btn" onClick={()=>this.setP({contrats:toggleIn(p.contrats,c)})} style={{height:h,padding:'0 18px',borderRadius:12,fontSize:15,...chipStyle(p.contrats.includes(c))}}>{c}</button>)}
+    </div>;
+  }
+
+  // ---------- 3. Résultats ----------
+  results(isMobile){
+    const s=this.state, f=s.filters, list=this.filtered();
+    const box = v => ({background:v?'var(--accent)':'transparent',borderColor:v?'var(--accent)':'var(--line)'});
+    const asideStyle = isMobile
+      ? {display:s.drawerOpen?'block':'none',position:'fixed',bottom:0,left:0,right:0,zIndex:61,maxHeight:'85%',borderRadius:'24px 24px 0 0'}
+      : {display:'block',position:'sticky',top:84,zIndex:1,maxHeight:'calc(100vh - 100px)',borderRadius:20};
+    const widen = (label,fn) => <button onClick={fn} style={{textAlign:'left',padding:'14px 16px',borderRadius:14,border:'1px solid var(--line)',background:'var(--surface2)',color:'var(--ink)',fontWeight:600,fontSize:15,cursor:'pointer'}}>{label}</button>;
+    return <section style={{maxWidth:1200,margin:'0 auto',padding:'32px 20px 64px'}}>
+      <div style={{display:'flex',flexWrap:'wrap',alignItems:'flex-end',justifyContent:'space-between',gap:16,marginBottom:16}}>
+        <div><h1 className="h1">{list.length?`${list.length} offres faites pour toi`:'Aucune offre pour l’instant'}</h1>
+          <p className="muted" style={{margin:'6px 0 0'}}>{s.profile.poste} · {s.profile.ville} · triées par compatibilité</p></div>
+        {isMobile && <button className="btn btn-ghost" onClick={()=>this.setState({drawerOpen:true})} style={{height:44,padding:'0 16px',borderRadius:12,fontSize:15}}>Filtres</button>}
+      </div>
+      <div style={{background:'var(--warnSoft)',color:'var(--warn)',borderRadius:14,padding:'10px 14px',fontSize:14,fontWeight:600,marginBottom:20}}>Version de démonstration : les offres ci-dessous sont des exemples fictifs.</div>
+      <div style={{display:'grid',gridTemplateColumns:isMobile?'minmax(0,1fr)':'280px minmax(0,1fr)',gap:24,alignItems:'start'}}>
+        {isMobile && s.drawerOpen && <div onClick={()=>this.setState({drawerOpen:false})} style={{position:'fixed',inset:0,zIndex:60,background:'rgba(10,10,20,.45)'}}/>}
+        <aside style={{...asideStyle,overflow:'auto',background:'var(--surface)',border:'1px solid var(--line)',padding:20}}>
+          <div style={{display:'flex',flexDirection:'column',gap:22}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><b style={{fontSize:18}}>Filtres</b><button className="link" style={{fontSize:14}} onClick={()=>this.setState({filters:DEF_FILTERS})}>Réinitialiser</button></div>
+            <div style={{display:'flex',flexDirection:'column',gap:6}}><b style={{fontSize:14}}>Contrat</b>
+              {CONTRACTS.map(c=>{const v=f.contrats.includes(c); return <button key={c} onClick={()=>this.setF({contrats:toggleIn(f.contrats,c)})} style={{display:'flex',alignItems:'center',gap:10,background:'none',border:'none',padding:'6px 0',fontWeight:500,fontSize:15,color:'var(--ink)',cursor:'pointer',textAlign:'left'}}>
+                <span style={{width:22,height:22,borderRadius:7,border:'2px solid',...box(v),display:'grid',placeItems:'center',color:'#fff',flex:'none'}}>{v && <Check/>}</span>
+                <span style={{flex:1}}>{c}</span><span className="muted" style={{fontSize:13}}>{OFFERS.filter(o=>o.contract===c).length}</span>
+              </button>;})}
+            </div>
+            <label style={{display:'flex',flexDirection:'column',gap:6}}><span style={{display:'flex',justifyContent:'space-between',fontWeight:700,fontSize:14}}>Distance<span className="muted" style={{fontWeight:600}}>≤ {f.distance} km</span></span>
+              <input type="range" min="5" max="50" step="5" value={f.distance} onChange={e=>this.setF({distance:Number(e.target.value)})} style={{width:'100%',accentColor:'var(--accent)'}}/></label>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}><b style={{fontSize:14}}>Salaire minimum</b>
+              <div className="seg" style={{gridTemplateColumns:'repeat(4,1fr)'}}>
+                {[[0,'Tous'],[38,'38 k'],[40,'40 k'],[43,'43 k']].map(([v,label])=><button key={v} onClick={()=>this.setF({salaireMin:v})} style={{height:36,fontSize:13,...segStyle(f.salaireMin===v)}}>{label}</button>)}
+              </div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}><b style={{fontSize:14}}>Secteur</b>
+              <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                {SECTORS.map(x=><button key={x} onClick={()=>this.setF({secteurs:toggleIn(f.secteurs,x)})} style={{padding:'6px 12px',borderRadius:999,fontWeight:600,fontSize:13,cursor:'pointer',...chipStyle(f.secteurs.includes(x)),borderWidth:1}}>{x}</button>)}
+              </div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:4}}><b style={{fontSize:14}}>Date de publication</b>
+              {[['all','Toutes'],['1','Dernières 24 h'],['7','7 derniers jours'],['30','30 derniers jours']].map(([v,label])=>{const a=f.date===v; return <button key={v} onClick={()=>this.setF({date:v})} style={{display:'flex',alignItems:'center',gap:10,background:'none',border:'none',padding:'6px 0',fontWeight:500,fontSize:15,color:'var(--ink)',cursor:'pointer'}}>
+                <span style={{width:20,height:20,borderRadius:'50%',border:'2px solid '+(a?'var(--accent)':'var(--line)'),display:'grid',placeItems:'center'}}><span style={{width:10,height:10,borderRadius:'50%',background:a?'var(--accent)':'transparent'}}/></span>{label}
+              </button>;})}
+            </div>
+            {isMobile && <button className="btn btn-primary" onClick={()=>this.setState({drawerOpen:false})} style={{height:52,borderRadius:14,fontSize:16}}>Voir {list.length} offres</button>}
+          </div>
+        </aside>
+
+        <div style={{display:'flex',flexDirection:'column',gap:14,minWidth:0}}>
+          {list.length===0 && <div className="card" style={{padding:32,display:'flex',flexDirection:'column',gap:16}}>
+            <h2 style={{margin:0,fontSize:26,letterSpacing:'-.02em'}}>Aucune offre avec ces filtres</h2>
+            <p className="muted" style={{margin:0}}>Pas d'inquiétude, ça arrive. Essaie d'élargir un peu ta recherche :</p>
+            <div style={{display:'flex',flexDirection:'column',gap:8}}>
+              {widen('Élargir ta zone à 40 km →',()=>this.setF({distance:40}))}
+              {widen('Ajouter le CDI et le CDD →',()=>this.setF({contrats:[...new Set([...f.contrats,'CDI','CDD'])]}))}
+              {widen('Retirer le salaire minimum →',()=>this.setF({salaireMin:0}))}
+            </div>
+            <button className="btn btn-dark" onClick={()=>this.setState({filters:DEF_FILTERS})} style={{alignSelf:'flex-start',height:48,padding:'0 20px',borderRadius:14,fontSize:15}}>Réinitialiser les filtres</button>
+          </div>}
+          {list.map(o=><article key={o.id} className="offer">
+            <div style={{display:'flex',gap:14,alignItems:'flex-start'}}>
+              <Logo o={o}/>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:800,fontSize:19,lineHeight:1.2,letterSpacing:'-.01em'}}>{o.title}</div>
+                <div className="muted" style={{fontWeight:600}}>{o.company}</div>
+              </div>
+              <div style={{textAlign:'right',flex:'none',width:96}}>
+                <div style={{fontSize:28,fontWeight:900,letterSpacing:'-.03em',color:'var(--accent)',lineHeight:1}}>{o.score} %</div>
+                <div style={{fontWeight:700,fontSize:12}}>compatible</div>
+                <div className="bar" style={{marginTop:6}}><div style={{width:s.scoreReady?o.score+'%':'0%',transition:'width 1s cubic-bezier(.2,.8,.2,1)'}}/></div>
+              </div>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:6,fontSize:13,fontWeight:600}}>
+              <span className="tag">{o.city}</span><span className="tag">{o.contract}</span><span className="tag">{o.salaryLabel}</span>
+              <span className="muted" style={{padding:'4px 10px'}}>{posted(o.posted)}</span>
+            </div>
+            <div style={{background:'var(--surface2)',borderRadius:14,padding:'12px 14px'}}>
+              <div style={{fontSize:12,fontWeight:800,letterSpacing:'.04em',textTransform:'uppercase',color:'var(--accentText)',marginBottom:4}}>En bref</div>
+              <div style={{textWrap:'pretty'}}>{o.summary}</div>
+            </div>
+            <div style={{display:'flex',flexDirection:'column',gap:4,fontSize:14}}><Reasons list={o.reasons.slice(0,2)}/></div>
+            {this.offerActions(o,true)}
+          </article>)}
+        </div>
+      </div>
+    </section>;
+  }
+
+  // ---------- 4. En savoir plus ----------
+  detail(){
+    const o=BY[this.state.current];
+    const box = (bg,title,color,children) => <div style={{background:bg,borderRadius:22,padding:22,display:'flex',flexDirection:'column',gap:10}}><b style={{color}}>{title}</b>{children}</div>;
+    return <section style={{maxWidth:1100,margin:'0 auto',padding:'24px 20px 64px',display:'flex',flexDirection:'column',gap:20}}>
+      <button className="back" onClick={()=>this.go('results')}>← Retour aux offres</button>
+      <div className="card" style={{borderRadius:26,padding:'clamp(20px,3vw,32px)',display:'flex',flexDirection:'column',gap:20}}>
+        <div style={{display:'flex',flexWrap:'wrap',gap:20,alignItems:'center'}}>
+          <Logo o={o} size={64} r={18} fs={28}/>
+          <div style={{flex:'1 1 260px',minWidth:0}}><h1 style={{margin:0,fontSize:'clamp(26px,4vw,38px)',letterSpacing:'-.03em',fontWeight:800,lineHeight:1.1}}>{o.title}</h1>
+            <div className="muted" style={{marginTop:6,fontWeight:600}}>{o.company} · {o.city} · {o.contract} · {o.salaryLabel} · {posted(o.posted)}</div></div>
+          <div style={{textAlign:'right'}}><div style={{fontSize:48,fontWeight:900,letterSpacing:'-.04em',color:'var(--accent)',lineHeight:1}}>{o.score} %</div><div style={{fontWeight:700}}>compatible</div></div>
+        </div>
+        {this.offerActions(o,false)}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,340px),1fr))',gap:20,alignItems:'start'}}>
+        <div className="card" style={{padding:'clamp(20px,3vw,28px)',display:'flex',flexDirection:'column',gap:18}}>
+          <h2 style={{margin:0,fontSize:20}}>L'offre</h2>
+          <p style={{margin:0,textWrap:'pretty'}}>{o.description}</p>
+          <div><b>Tes missions</b><ul style={{margin:'8px 0 0',paddingLeft:20,display:'flex',flexDirection:'column',gap:4}}>{o.missions.map(m=><li key={m}>{m}</li>)}</ul></div>
+          <div><b>Profil recherché</b><ul style={{margin:'8px 0 0',paddingLeft:20,display:'flex',flexDirection:'column',gap:4}}>{o.wanted.map(m=><li key={m}>{m}</li>)}</ul></div>
+          <button className="link" style={{alignSelf:'flex-start',padding:0}} onClick={()=>this.applyLink()}>Voir l’annonce d’origine et postuler ↗</button>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+          {box('var(--goodSoft)','Tes points forts pour ce poste','var(--good)',<Reasons list={o.reasons}/>)}
+          {box('var(--warnSoft)','Ce qui te manque','var(--warn)',<Reasons list={o.missing} icon="!" color="var(--warn)"/>)}
+          <div className="card" style={{borderRadius:22,padding:22,display:'flex',flexDirection:'column',gap:8}}><b>Notre conseil</b><span className="muted" style={{textWrap:'pretty'}}>{o.tip}</span></div>
+        </div>
+      </div>
+    </section>;
+  }
+
+  // ---------- 5. Génération lettre / message ----------
+  generate(isMobile){
+    const s=this.state, o=BY[s.current], kind=s.kind, k=this.key(), text=this.textFor(s.current,kind), other=kind==='letter'?'message':'letter';
+    const pickTone = (t,active) => { const tone=active?'base':t; this.setState({genLoading:true}); this.later(()=>this.setState(st=>{const m={...st.texts};delete m[k];return {genLoading:false,texts:m,tones:{...st.tones,[k]:tone}};}),700); };
+    const regenerate = () => { this.setState({genLoading:true}); this.later(()=>this.setState(st=>{const m={...st.texts};delete m[k];return {genLoading:false,texts:m};}),700); };
+    return <section style={{maxWidth:1200,margin:'0 auto',padding:'24px 20px 64px',display:'flex',flexDirection:'column',gap:20}}>
+      <button className="back" onClick={()=>this.go('results')}>← Retour aux offres</button>
+      <h1 style={{margin:0,fontSize:'clamp(28px,4.4vw,42px)',letterSpacing:'-.03em',fontWeight:800,lineHeight:1.05}}>{kind==='letter'?'Ta lettre de motivation':'Ton message au recruteur'}</h1>
+      <div style={{display:'grid',gridTemplateColumns:isMobile?'minmax(0,1fr)':'340px minmax(0,1fr)',gap:20,alignItems:'start'}}>
+        <div className="card" style={{padding:22,display:'flex',flexDirection:'column',gap:14,position:isMobile?'static':'sticky',top:84}}>
+          <div style={{display:'flex',gap:12,alignItems:'center'}}><Logo o={o} size={44} r={13} fs={18}/><div><div style={{fontWeight:800,lineHeight:1.2}}>{o.title}</div><div className="muted" style={{fontSize:14,fontWeight:600}}>{o.company}</div></div></div>
+          <div className="muted" style={{fontSize:14}}>{o.city} · {o.contract} · {o.salaryLabel}</div>
+          <div style={{fontSize:14}}>{o.summary}</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8,borderTop:'1px solid var(--line)',paddingTop:14}}>
+            <button className="btn btn-soft" onClick={()=>this.openGenerator(o.id,other)} style={{height:44,fontSize:14}}>{KINDS[other].gen} →</button>
+            <button className="btn btn-ghost" onClick={()=>this.go('detail')} style={{height:44,fontSize:14}}>En savoir plus sur l’offre</button>
+          </div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:16,minWidth:0}}>
+          <div className="card" style={{padding:'clamp(16px,3vw,24px)',display:'flex',flexDirection:'column',gap:12}}>
+            <div style={{display:'flex',flexWrap:'wrap',justifyContent:'space-between',gap:8,alignItems:'baseline'}}><b style={{fontSize:18}}>{KINDS[kind].label}</b><span className="muted" style={{fontSize:13}}>Rédigé à partir de ton CV et de l'offre · modifiable</span></div>
+            {s.genLoading
+              ? <div style={{minHeight:kind==='letter'?420:300,borderRadius:16,background:'var(--surface2)',display:'flex',alignItems:'center',justifyContent:'center',gap:12,fontWeight:700,color:'var(--muted)'}}><span className="spinner"/>{KINDS[kind].loading}</div>
+              : <textarea value={text} rows={kind==='letter'?20:13} onChange={e=>this.setState({texts:{...s.texts,[k]:e.target.value}})}
+                  style={{width:'100%',resize:'vertical',padding:16,border:'1px solid var(--line)',borderRadius:16,background:'var(--surface2)',color:'var(--ink)',font:'500 16px/1.55 Figtree,sans-serif',animation:'pop .25s ease'}}/>}
+            <div style={{display:'flex',flexWrap:'wrap',gap:8,alignItems:'center'}}>
+              {TONES.map(([t,label])=>{const a=s.tones[k]===t; return <button key={t} className="btn" disabled={s.genLoading} onClick={()=>pickTone(t,a)}
+                style={{height:40,padding:'0 14px',borderRadius:12,fontSize:14,border:'1.5px solid '+(a?'var(--accent)':'var(--line)'),background:a?'var(--accentSoft)':'var(--surface)',color:a?'var(--accentText)':'var(--ink)'}}>{label}</button>;})}
+              <button className="link" disabled={s.genLoading} onClick={regenerate} style={{fontSize:14}}>↻ Régénérer</button>
+              <span style={{flex:1}}/><span className="muted" style={{fontSize:13}}>{text.trim().split(/\s+/).length} mots</span>
+            </div>
+          </div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
+            <button className="btn btn-primary" disabled={s.genLoading} onClick={()=>this.copy(text)} style={{flex:'1 1 200px',height:56,fontSize:17}}>Copier {KINDS[kind].short}</button>
+            {kind==='letter' && <button className="btn btn-ghost" disabled={s.genLoading} onClick={()=>this.download(text,o)} style={{flex:'1 1 200px',height:56,borderRadius:16,fontSize:17}}>Télécharger (.txt)</button>}
+            <button className="btn btn-ghost" onClick={()=>this.applyLink()} style={{flex:'1 1 200px',height:56,borderRadius:16,fontSize:17}}>Postuler sur l’annonce ↗</button>
+          </div>
+          <div className="muted" style={{fontSize:14}}>Astuce : relis ton texte et ajoute une phrase à toi. Un recruteur repère vite un texte trop générique.</div>
+        </div>
+      </div>
+    </section>;
+  }
+
+  // ---------- 6a. Connexion ----------
+  auth(){
+    const s=this.state, signup=s.authMode==='signup';
+    const finish = () => this.setState({loggedIn:true,authError:''},()=>this.go('results'));
+    const submit = () => {
+      if(!/.+@.+\..+/.test(s.authEmail)) return this.setState({authError:'Vérifie ton adresse email.'});
+      if(s.authPw.length<6) return this.setState({authError:'Ton mot de passe doit faire au moins 6 caractères.'});
+      finish();
+    };
+    return <section style={{maxWidth:460,margin:'0 auto',padding:'clamp(32px,8vh,80px) 20px'}}>
+      <div className="card" style={{borderRadius:28,padding:'clamp(22px,4vw,32px)',display:'flex',flexDirection:'column',gap:16}}>
+        <h1 style={{margin:0,fontSize:30,letterSpacing:'-.03em',fontWeight:800,lineHeight:1.1}}>{signup?'Crée ton compte':'Content de te revoir'}</h1>
+        <p className="muted" style={{margin:0}}>{signup?'30 secondes, et tu retrouves ton CV, tes offres et tes textes à chaque visite.':'Connecte-toi pour retrouver tes offres et tes textes.'}</p>
+        <button className="btn btn-ghost" onClick={finish} style={{height:52,fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',gap:10}}><span style={{width:22,height:22,borderRadius:'50%',background:'var(--surface2)',display:'grid',placeItems:'center',fontWeight:900,fontSize:13}}>G</span>Continuer avec Google</button>
+        <div className="muted" style={{display:'flex',alignItems:'center',gap:12,fontSize:13}}><span style={{flex:1,height:1,background:'var(--line)'}}/>ou<span style={{flex:1,height:1,background:'var(--line)'}}/></div>
+        <label className="field"><span className="label">Email</span><input className="input" style={{fontWeight:500}} type="email" placeholder="prenom.nom@mail.fr" value={s.authEmail} onChange={e=>this.setState({authEmail:e.target.value,authError:''})}/></label>
+        <label className="field"><span className="label">Mot de passe</span><input className="input" style={{fontWeight:500}} type="password" placeholder="6 caractères minimum" value={s.authPw} onChange={e=>this.setState({authPw:e.target.value,authError:''})} onKeyDown={e=>e.key==='Enter'&&submit()}/></label>
+        {s.authError && <div style={{color:'var(--bad)',fontWeight:600,fontSize:14}}>{s.authError}</div>}
+        <button className="btn btn-primary" onClick={submit} style={{height:54,borderRadius:14,fontSize:17}}>{signup?'Créer mon compte':'Se connecter'}</button>
+        <button className="link" onClick={()=>this.setState({authMode:signup?'login':'signup',authError:''})}>{signup?'Déjà un compte ? Se connecter':'Pas encore de compte ? S’inscrire'}</button>
+        <p className="muted" style={{margin:0,fontSize:13,textAlign:'center'}}>En continuant, tu acceptes les <a href="#" onClick={e=>e.preventDefault()}>CGU</a> et la <a href="#" onClick={e=>e.preventDefault()}>politique de confidentialité</a>.</p>
+      </div>
+    </section>;
+  }
+
+  // ---------- 6b. Paramètres ----------
+  settings(){
+    const s=this.state, p=s.profile;
+    const block = (title,children,gap=16) => <div className="card" style={{padding:22,display:'flex',flexDirection:'column',gap}}><b style={{fontSize:19}}>{title}</b>{children}</div>;
+    const delAcc = s.deleteOpen==='account';
+    const confirmDelete = () => {
+      if(delAcc){ this.go('home',{deleteOpen:null,loggedIn:false,cvs:[],texts:{},tones:{},profile:DEF_PROFILE,consent:false}); this.showToast('Compte et données supprimés.'); }
+      else { this.setState({deleteOpen:null,cvs:[],texts:{}}); this.showToast('Ton CV et tes données d’analyse ont été supprimés.'); }
+    };
+    return <section style={{maxWidth:780,margin:'0 auto',padding:'32px 20px 64px',display:'flex',flexDirection:'column',gap:18}}>
+      <h1 className="h1">Paramètres</h1>
+      <div className="card" style={{padding:22,display:'flex',flexDirection:'column',gap:12}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}><b style={{fontSize:19}}>Mes CV</b>
+          <button className="btn btn-dark" onClick={()=>this.addCvRef.current.click()} style={{height:40,padding:'0 14px',fontSize:14}}>+ Ajouter une version</button>
+          <input ref={this.addCvRef} type="file" accept=".pdf,.doc,.docx" style={{display:'none'}} onChange={e=>{const f=e.target.files[0]; e.target.value=''; if(f){ this.setState(st=>({cvs:[...st.cvs,{id:Date.now(),name:f.name,date:today(),main:st.cvs.length===0}]})); this.showToast('Nouvelle version ajoutée.'); }}}/></div>
+        {s.cvs.length===0 && <div className="muted" style={{padding:'12px 0'}}>Aucun CV enregistré.</div>}
+        {s.cvs.map(c=><div key={c.id} style={{display:'flex',flexWrap:'wrap',gap:12,alignItems:'center',padding:12,borderRadius:16,background:'var(--surface2)'}}>
+          <Pdf w={32} h={40} fs={9}/>
+          <div style={{flex:'1 1 180px',minWidth:0}}><div style={{fontWeight:700}}>{c.name}</div><div className="muted" style={{fontSize:13}}>Ajouté le {c.date}</div></div>
+          {c.main
+            ? <span className="pill" style={{background:'var(--accentSoft)',color:'var(--accentText)'}}>Principal</span>
+            : <button className="link" style={{fontSize:14}} onClick={()=>this.setState(st=>({cvs:st.cvs.map(x=>({...x,main:x.id===c.id}))}))}>Définir comme principal</button>}
+          <button className="link" style={{fontSize:14,color:'var(--bad)'}} onClick={()=>this.setState(st=>{let l=st.cvs.filter(x=>x.id!==c.id); if(c.main&&l.length) l=l.map((x,i)=>({...x,main:i===0})); return {cvs:l};})}>Supprimer</button>
+        </div>)}
+      </div>
+      {block('Préférences de recherche',<>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,220px),1fr))',gap:14}}>
+          <label className="field"><span className="label">Poste</span><input className="input" value={p.poste} onChange={e=>this.setP({poste:e.target.value})}/></label>
+          <label className="field"><span className="label">Ville</span><input className="input" value={p.ville} onChange={e=>this.setP({ville:e.target.value})}/></label>
+        </div>
+        <label className="field" style={{gap:8}}><span className="label" style={{display:'flex',justifyContent:'space-between'}}>Mobilité<b style={{color:'var(--ink)'}}>{p.mobilite} km</b></span><input type="range" min="5" max="60" step="5" value={p.mobilite} onChange={e=>this.setP({mobilite:Number(e.target.value)})} style={{width:'100%',accentColor:'var(--accent)'}}/></label>
+        {this.contractChips(42)}
+      </>)}
+      {block('Alertes email',<>
+        <button onClick={()=>this.setState({alerts:!s.alerts})} style={{display:'flex',alignItems:'center',gap:14,background:'none',border:'none',padding:0,cursor:'pointer',textAlign:'left',color:'var(--ink)',fontWeight:500,fontSize:16}}>
+          <span style={{flex:1}}><b>Nouvelles offres compatibles</b><span className="muted" style={{display:'block',fontSize:14}}>On t'écrit quand une offre dépasse 80 % de compatibilité.</span></span>
+          <span style={{width:50,height:30,borderRadius:999,background:s.alerts?'var(--accent)':'var(--line)',padding:3,display:'flex',justifyContent:s.alerts?'flex-end':'flex-start',transition:'all .2s',flex:'none'}}><span style={{width:24,height:24,borderRadius:'50%',background:'#fff',boxShadow:'0 1px 3px rgba(0,0,0,.3)'}}/></span>
+        </button>
+        <div className="seg" style={{gridTemplateColumns:'repeat(2,1fr)',maxWidth:340}}>
+          {[['jour','Chaque jour'],['semaine','Chaque semaine']].map(([v,label])=><button key={v} onClick={()=>this.setState({freq:v})} style={{height:38,fontSize:14,...segStyle(s.freq===v)}}>{label}</button>)}
+        </div>
+      </>,14)}
+      {block('Mes données',<>
+        <p className="muted" style={{margin:0,fontSize:15}}>Tu gardes le contrôle. Tu peux récupérer ou effacer tes données à tout moment.</p>
+        <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
+          <button className="btn btn-ghost" onClick={()=>this.showToast('On t’envoie une archive de tes données par email.')} style={{height:46,padding:'0 16px',borderRadius:12,fontSize:14}}>Télécharger mes données</button>
+          <button className="btn" onClick={()=>this.setState({deleteOpen:'data'})} style={{height:46,padding:'0 16px',borderRadius:12,border:'1px solid var(--bad)',background:'transparent',color:'var(--bad)',fontSize:14}}>Supprimer mon CV et mes données</button>
+          <button className="btn" onClick={()=>this.setState({deleteOpen:'account'})} style={{height:46,padding:'0 16px',borderRadius:12,background:'var(--bad)',color:'#fff',fontSize:14}}>Supprimer mon compte</button>
+        </div>
+      </>,12)}
+      {s.deleteOpen && <div className="overlay"><div className="modal" style={{maxWidth:440}}>
+        <h2 style={{margin:0,fontSize:24,letterSpacing:'-.02em'}}>{delAcc?'Supprimer ton compte ?':'Supprimer ton CV et tes données ?'}</h2>
+        <p className="muted" style={{margin:0}}>{delAcc?'Ton compte, tes CV, ton profil et tes textes générés seront effacés. Cette action est irréversible.':'Tes CV, les données tirées de leur analyse et tes textes générés seront effacés. Ton compte reste.'}</p>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          <button className="btn btn-ghost" onClick={()=>this.setState({deleteOpen:null})} style={{flex:'1 1 140px',height:50,fontSize:15}}>Annuler</button>
+          <button className="btn" onClick={confirmDelete} style={{flex:'1 1 160px',height:50,borderRadius:14,background:'var(--bad)',color:'#fff',fontSize:15}}>Supprimer définitivement</button>
+        </div>
+      </div></div>}
+    </section>;
+  }
+
+  render(){
+    const s=this.state, isMobile = s.width<760;
+    return <>
+      {this.header(isMobile)}
+      <main>{this[s.screen](isMobile)}</main>
+      <footer style={{borderTop:'1px solid var(--line)',background:'var(--surface)'}}>
+        <div className="muted" style={{maxWidth:1200,margin:'0 auto',padding:'28px 20px',display:'flex',flexWrap:'wrap',gap:'16px 28px',alignItems:'center',fontSize:14}}>
+          <b style={{color:'var(--ink)',fontSize:16}}>Trempl<span style={{color:'var(--accent)'}}>1</span></b>
+          <span style={{flex:1}}/>
+          <div style={{display:'flex',flexWrap:'wrap',gap:20}}>
+            {['Mentions légales','Confidentialité','CGU','Contact'].map(l=><a key={l} href="#" onClick={e=>e.preventDefault()}>{l}</a>)}
+          </div>
+        </div>
+      </footer>
+      {s.toast && <div style={{position:'fixed',left:'50%',bottom:24,transform:'translateX(-50%)',zIndex:95,background:'var(--ink)',color:'var(--bg)',padding:'12px 18px',borderRadius:14,fontWeight:600,fontSize:15,maxWidth:'calc(100% - 32px)',boxShadow:'0 14px 30px rgba(0,0,0,.25)'}}>{s.toast}</div>}
+    </>;
+  }
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
