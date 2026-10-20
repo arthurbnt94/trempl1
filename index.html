@@ -218,7 +218,11 @@ class App extends React.Component {
     a.href=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'}));
     a.download=`Lettre_motivation_${o.company.replace(/\s+/g,'_')}.txt`; a.click(); URL.revokeObjectURL(a.href);
   }
-  applyLink(){ this.showToast('Démo : le lien vers l’annonce d’origine arrivera avec les vraies offres.'); }
+  // Ouvre l'annonce d'origine dans un nouvel onglet (les offres de démo n'ont pas encore de lien)
+  applyLink(o){
+    if(o.url) window.open(o.url,'_blank','noopener');
+    else this.showToast('Démo : le lien vers l’annonce d’origine arrivera avec les vraies offres.');
+  }
   startUpload(file){
     if(!this.state.consent){ this.setState({consentError:true}); return; }
     const name = file ? file.name : 'CV_Lea_Martin_2026.pdf';
@@ -242,6 +246,7 @@ class App extends React.Component {
       {withMore && <button className="btn btn-ghost" onClick={()=>this.go('detail',{current:o.id})}>En savoir plus</button>}
       <button className="btn btn-primary" onClick={()=>this.openGenerator(o.id,'letter')}>Générer une lettre de motivation</button>
       <button className="btn btn-soft" onClick={()=>this.openGenerator(o.id,'message')}>Générer un message au recruteur</button>
+      <button className="btn btn-dark" onClick={()=>this.applyLink(o)}>Postuler ↗</button>
     </div>;
   }
 
@@ -557,7 +562,7 @@ class App extends React.Component {
           <p style={{margin:0,textWrap:'pretty'}}>{o.description}</p>
           <div><b>Tes missions</b><ul style={{margin:'8px 0 0',paddingLeft:20,display:'flex',flexDirection:'column',gap:4}}>{o.missions.map(m=><li key={m}>{m}</li>)}</ul></div>
           <div><b>Profil recherché</b><ul style={{margin:'8px 0 0',paddingLeft:20,display:'flex',flexDirection:'column',gap:4}}>{o.wanted.map(m=><li key={m}>{m}</li>)}</ul></div>
-          <button className="link" style={{alignSelf:'flex-start',padding:0}} onClick={()=>this.applyLink()}>Voir l’annonce d’origine et postuler ↗</button>
+          <button className="link" style={{alignSelf:'flex-start',padding:0}} onClick={()=>this.applyLink(o)}>Voir l’annonce d’origine et postuler ↗</button>
         </div>
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
           {box('var(--goodSoft)','Tes points forts pour ce poste','var(--good)',<Reasons list={o.reasons}/>)}
@@ -603,7 +608,7 @@ class App extends React.Component {
           <div style={{display:'flex',flexWrap:'wrap',gap:10}}>
             <button className="btn btn-primary" disabled={s.genLoading} onClick={()=>this.copy(text)} style={{flex:'1 1 200px',height:56,fontSize:17}}>Copier {KINDS[kind].short}</button>
             {kind==='letter' && <button className="btn btn-ghost" disabled={s.genLoading} onClick={()=>this.download(text,o)} style={{flex:'1 1 200px',height:56,borderRadius:16,fontSize:17}}>Télécharger (.txt)</button>}
-            <button className="btn btn-ghost" onClick={()=>this.applyLink()} style={{flex:'1 1 200px',height:56,borderRadius:16,fontSize:17}}>Postuler sur l’annonce ↗</button>
+            <button className="btn btn-ghost" onClick={()=>this.applyLink(o)} style={{flex:'1 1 200px',height:56,borderRadius:16,fontSize:17}}>Postuler sur l’annonce ↗</button>
           </div>
           <div className="muted" style={{fontSize:14}}>Astuce : relis ton texte et ajoute une phrase à toi. Un recruteur repère vite un texte trop générique.</div>
         </div>
