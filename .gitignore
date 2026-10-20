@@ -1,0 +1,9 @@
+# Secrets : jamais sur GitHub
+.env
+.env.*
+
+# Fichiers système
+.DS_Store
+
+# Dossier local de Netlify
+.netlify/
