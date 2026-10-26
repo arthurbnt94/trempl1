@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trempl1</title>
+<title>Mon Trempl1</title>
 <meta name="description" content="Dépose ton CV, découvre les offres qui te correspondent et génère ta lettre de motivation ou ton message au recruteur en un clic.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -67,7 +67,7 @@ main{flex:1}
 
 <script type="text/babel" data-presets="react">
 // ---------- Réglages ----------
-const SITE_NAME = 'Trempl1';
+const SITE_NAME = 'Mon Trempl1';
 // Pour tester l'écran d'erreur de lecture du CV : ajouter ?cvError à l'URL
 const SIMULATE_CV_ERROR = new URLSearchParams(location.search).has('cvError');
 
@@ -136,12 +136,12 @@ const SECTORS = ['BTP','Banque','Conseil','E-commerce','Énergie','Transport','S
 const CONTRACTS = ['CDI','CDD','Alternance','Stage'];
 const STEPS = [['Compétences','7 repérées'],['Expérience','2 ans d’alternance'],['Formation','Master · Bac+5'],['Localisation','Montreuil (93)']];
 const KINDS = {
-  letter:{label:'Lettre de motivation',short:'la lettre',gen:'Générer la lettre de motivation',loading:'Trempl1 rédige ta lettre de motivation…'},
-  message:{label:'Message au recruteur',short:'le message',gen:'Générer un court message au recruteur',loading:'Trempl1 rédige ton message au recruteur…'}};
+  letter:{label:'Lettre de motivation',short:'la lettre',gen:'Générer la lettre de motivation',loading:'Mon Trempl1 rédige ta lettre de motivation…'},
+  message:{label:'Message au recruteur',short:'le message',gen:'Générer un court message au recruteur',loading:'Mon Trempl1 rédige ton message au recruteur…'}};
 const TONES = [['formel','Plus formel'],['court','Plus court'],['motive','Plus motivé']];
 const FAQ = [
   ['C’est vraiment gratuit ?','Oui. Le service est gratuit pour les candidats.'],
-  ['Vous postulez à ma place ?','Non. Trempl1 trouve les offres et rédige tes textes. Tu les relis, tu les modifies si tu veux, et tu postules toi-même sur l’annonce. Rien n’est envoyé en ton nom.'],
+  ['Vous postulez à ma place ?','Non. Mon Trempl1 trouve les offres et rédige tes textes. Tu les relis, tu les modifies si tu veux, et tu postules toi-même sur l’annonce. Rien n’est envoyé en ton nom.'],
   ['Les lettres sont vraiment personnalisées ?','Oui : chaque texte est rédigé à partir de ton CV et de la fiche de poste. Relis-le quand même et ajoute ta touche, c’est toi que le recruteur veut rencontrer.'],
   ['Que faites-vous de mon CV ?','On l’utilise uniquement pour te proposer des offres et rédiger tes textes. Il n’est jamais vendu ni partagé.'],
   ['Je peux supprimer mes données ?','Oui, à tout moment depuis tes paramètres : ton CV, ton profil et ton compte, en un clic.']];
@@ -257,7 +257,7 @@ class App extends React.Component {
       <div style={{maxWidth:1200,margin:'0 auto',padding:'12px 20px',display:'flex',alignItems:'center',gap:20}}>
         <button onClick={()=>this.go('home')} style={{display:'flex',alignItems:'center',gap:10,background:'none',border:'none',cursor:'pointer',padding:0,color:'var(--ink)'}}>
           <span style={{width:34,height:34,borderRadius:11,background:'var(--accent)',display:'grid',placeItems:'center',color:'#fff',fontWeight:900,fontSize:18}}>T</span>
-          <span style={{fontWeight:800,fontSize:20,letterSpacing:'-.02em'}}>Trempl<span style={{color:'var(--accent)'}}>1</span></span>
+          <span style={{fontWeight:800,fontSize:20,letterSpacing:'-.02em'}}>Mon Trempl<span style={{color:'var(--accent)'}}>1</span></span>
         </button>
         {!isMobile && s.loggedIn && <nav style={{display:'flex',gap:4}}>
           <button className="nav-item" onClick={()=>this.go('results')}>Mes offres</button>
@@ -709,7 +709,7 @@ class App extends React.Component {
       <main>{this[s.screen](isMobile)}</main>
       <footer style={{borderTop:'1px solid var(--line)',background:'var(--surface)'}}>
         <div className="muted" style={{maxWidth:1200,margin:'0 auto',padding:'28px 20px',display:'flex',flexWrap:'wrap',gap:'16px 28px',alignItems:'center',fontSize:14}}>
-          <b style={{color:'var(--ink)',fontSize:16}}>Trempl<span style={{color:'var(--accent)'}}>1</span></b>
+          <b style={{color:'var(--ink)',fontSize:16}}>Mon Trempl<span style={{color:'var(--accent)'}}>1</span></b>
           <span style={{flex:1}}/>
           <div style={{display:'flex',flexWrap:'wrap',gap:20}}>
             {['Mentions légales','Confidentialité','CGU','Contact'].map(l=><a key={l} href="#" onClick={e=>e.preventDefault()}>{l}</a>)}
